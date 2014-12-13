@@ -1,7 +1,5 @@
 package com.rrj09832.rjob;
 
-import java.lang.String;
-
 public class Order
 {
     private double price;

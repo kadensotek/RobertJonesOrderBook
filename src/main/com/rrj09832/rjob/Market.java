@@ -4,7 +4,6 @@ import com.rrj09832.rjob.Order;
 
 import java.lang.Double;
 
-import java.util.*;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -18,8 +17,8 @@ public class Market
     private Map<Double, List<Order>> bidMap = null;
     private Map<Double, List<Order>> offerMap = null;
 
-    private Queue<Double> bidList = null;
-    private Queue<Double> offerList = null;
+    private Queue<Double> bidMaxPriceList = null;
+    private Queue<Double> offerMinPriceList = null;
 
     // Initializes marketplace
     public Market()
@@ -27,34 +26,34 @@ public class Market
         bidMap = new HashMap<Double, List<Order>>();
         offerMap = new HashMap<Double, List<Order>>();
 
-        bidList = new PriorityQueue<Double>(java.util.Collections.reverseOrder()); // top value will be max value
-        offerList = new PriorityQueue<Double>();  // top value will be min value
+        bidMaxPriceList = new PriorityQueue<Double>(java.util.Collections.reverseOrder()); // top is max bid price
+        offerMinPriceList = new PriorityQueue<Double>();  // top is min offer price
     }
 
     /*  Adds bid to map by hashing the price, then
      *  adding bid to list located in that hash bucket
      */
-    public void addBid(Double price, int quantity)
+    public void addBid(double price, int quantity)
     {
         List<Order> bucket = getBucket(bidMap, price);
         Order newBid = new Order(price, quantity);
         bucket.add(newBid);
         bidMap.put(newBid.getPrice(), bucket);
-        bidList.add(price);
-//        matchOrders();
+        bidMaxPriceList.add(price);
+        matchOrders();
     }
 
     /*  Adds offer to map by hashing the price, then
      *  adding offer to list located in that hash bucket
      */
-    public void addOffer(Double price, int quantity)
+    public void addOffer(double price, int quantity)
     {
         List<Order> bucket = getBucket(offerMap, price);
         Order newOffer = new Order(price, quantity);
         bucket.add(newOffer);
         offerMap.put(newOffer.getPrice(), bucket);
-        offerList.add(price);
-//        matchOrders();
+        offerMinPriceList.add(price);
+        matchOrders();
     }
 
     // Returns bucket list if price match, otherwise returns new list
@@ -72,31 +71,66 @@ public class Market
         return bucket;
     }
 
-    // matches offers and bids based on pricetime priority
+    // Matches offers and bids based on pricetime priority
     public void matchOrders()
     {
+        List<Order> bidBucket = null;
+        List<Order> offerBucket = null;
+        Double lowestOffer = null;
+        Double highestBid = null;
         boolean finished = false;
 
         while(!finished)
         {
-            /*  get copy of lowestOffer and highestBid
+            highestBid = bidMaxPriceList.peek();
+            lowestOffer = offerMinPriceList.peek();
 
-                If lowestOffer.price > highestBid.price || lO == null || hB == null
-                    finished = true
+            if(lowestOffer == null || highestBid == null || lowestOffer > highestBid)
+            {
+                // No possible trade if either list is empty or no bid higher than an offer
+                finished = true;
+            }
+            else
+            {
+                // gets buckets for both maps
+                bidBucket = bidMap.get(bidMaxPriceList.peek());
+                offerBucket = offerMap.get(offerMinPriceList.peek());
+
+                // Gets first element from each bucket since that's the oldest
+                int bidQuantity = bidBucket.get(0).getQuantity();
+                int offerQuantity = offerBucket.get(0).getQuantity();
+
+                if(bidQuantity > offerQuantity)
+                {
+                    System.out.println(offerQuantity + " shares traded for " + lowestOffer + " dollars per share.");
+
+                    // Decrement quantity in bid and close previous offer
+                    bidQuantity -= offerQuantity;
+                    bidBucket.get(0).setQuantity(bidQuantity);
+                    offerBucket.remove(0);
+                    offerMinPriceList.remove();
+                }
+                else if(offerQuantity > bidQuantity)
+                {
+                    System.out.println(bidQuantity + " shares traded for " + lowestOffer + " dollars per share.");
+
+                    // Decrement quantity in offer and close previous bid
+                    offerQuantity -= bidQuantity;
+                    bidBucket.remove(0);
+                    bidMaxPriceList.remove();
+                    offerBucket.get(0).setQuantity(offerQuantity);
+                }
                 else
-                    if highestBid.quantity > lowestOffer.quantity
-                        print "trade of lowO.quantity for lowO.price per share"
-                        highBid.quantity -= lowO.quantity
-                        remove lowestOffer
-                    else if lowestOff.quantity > highestBig.quantity
-                        print "trade of highBid.quantity for lowO.price per share"
-                        lowOffer.quantity -= highBid.quantity
-                        remove highestBid
-                    else
-                        print "Trade of lowO.quantity for lowO.price per share"
-                        remove lowestOffer
-                        remove highestBid
-             */
+                {
+                    System.out.println(bidQuantity + " shares traded for " + lowestOffer + " dollars per share.");
+
+                    // Remove bid and offer because they're both closed
+                    bidBucket.remove(0);
+                    bidMaxPriceList.remove();
+                    offerBucket.remove(0);
+                    offerMinPriceList.remove();
+                }
+            }
         }
     }
 
@@ -107,7 +141,6 @@ public class Market
 
     public void printBids()
     {
-        System.out.println("Max bid is: " + bidList.peek());
         System.out.println("Values of map after iterating over it : ");
 
         for (Double key : bidMap.keySet())
@@ -125,7 +158,6 @@ public class Market
 
     public void printOffers()
     {
-        System.out.println("Min offer is: " + offerList.peek());
         System.out.println("Values of map after iterating over it : ");
 
         for (Double key : offerMap.keySet())
