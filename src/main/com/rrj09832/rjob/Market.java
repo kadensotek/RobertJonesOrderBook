@@ -4,12 +4,13 @@ import com.rrj09832.rjob.Order;
 
 import java.lang.Double;
 
-import java.util.Map;
+import java.util.*;
 import java.util.HashMap;
-import java.util.Queue;
-import java.util.PriorityQueue;
-import java.util.List;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.PriorityQueue;
+import java.util.Queue;
 
 public class Market
 {
@@ -26,8 +27,8 @@ public class Market
         bidMap = new HashMap<Double, List<Order>>();
         offerMap = new HashMap<Double, List<Order>>();
 
-        bidList = new PriorityQueue<Double>();
-        offerList = new PriorityQueue<Double>();
+        bidList = new PriorityQueue<Double>(java.util.Collections.reverseOrder()); // top value will be max value
+        offerList = new PriorityQueue<Double>();  // top value will be min value
     }
 
     /*  Adds bid to map by hashing the price, then
@@ -106,13 +107,31 @@ public class Market
 
     public void printBids()
     {
-        System.out.println("Max bid is: " + bidList.remove());
-        System.out.println("\nValues of map after iterating over it : ");
+        System.out.println("Max bid is: " + bidList.peek());
+        System.out.println("Values of map after iterating over it : ");
 
         for (Double key : bidMap.keySet())
         {
 
             List<Order> bucket = bidMap.get(key);
+
+            for(Order o : bucket)
+            {
+                System.out.println(o.toString());
+            }
+            //bids.remove(key);
+        }
+    }
+
+    public void printOffers()
+    {
+        System.out.println("Min offer is: " + offerList.peek());
+        System.out.println("Values of map after iterating over it : ");
+
+        for (Double key : offerMap.keySet())
+        {
+
+            List<Order> bucket = offerMap.get(key);
 
             for(Order o : bucket)
             {

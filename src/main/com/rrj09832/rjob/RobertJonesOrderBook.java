@@ -16,6 +16,14 @@ public class RobertJonesOrderBook
         myMarket.addBid(12.34, 60);
         myMarket.printBids();
 
+        myMarket.addOffer(20.0, 50);
+        myMarket.addOffer(20.0, 60);
+        myMarket.addOffer(11.0, 50);
+        myMarket.addOffer(2.0, 50);
+        myMarket.addOffer(2.0, 11);
+        myMarket.addOffer(15.0, 50);
+        myMarket.printOffers();
+
     }
 
 }
