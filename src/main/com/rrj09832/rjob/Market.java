@@ -27,7 +27,7 @@ public class Market
         bidMap = new HashMap<Double, List<Order>>();
         offerMap = new HashMap<Double, List<Order>>();
 
-        bidMaxPriceList = new PriorityQueue<Double>(Collections.reverseOrder()); // top is maximum bid price
+        bidMaxPriceList = new PriorityQueue<Double>(30, Collections.reverseOrder()); // top is maximum bid price
         offerMinPriceList = new PriorityQueue<Double>();  // top is minimum offer price
     }
 
