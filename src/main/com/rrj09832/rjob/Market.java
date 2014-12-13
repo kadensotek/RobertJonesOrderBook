@@ -4,6 +4,7 @@ import com.rrj09832.rjob.Order;
 
 import java.lang.Double;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -26,8 +27,8 @@ public class Market
         bidMap = new HashMap<Double, List<Order>>();
         offerMap = new HashMap<Double, List<Order>>();
 
-        bidMaxPriceList = new PriorityQueue<Double>(java.util.Collections.reverseOrder()); // top is max bid price
-        offerMinPriceList = new PriorityQueue<Double>();  // top is min offer price
+        bidMaxPriceList = new PriorityQueue<Double>(Collections.reverseOrder()); // top is maximum bid price
+        offerMinPriceList = new PriorityQueue<Double>();  // top is minimum offer price
     }
 
     /*  Adds bid to map by hashing the price, then
@@ -57,7 +58,7 @@ public class Market
     }
 
     // Returns bucket list if price match, otherwise returns new list
-    private List<Order> getBucket(Map<Double, List<Order>> hashmap, Double price)
+    public List<Order> getBucket(Map<Double, List<Order>> hashmap, Double price)
     {
         List<Order> bucket;
         if(hashmap.containsKey(price))
@@ -82,49 +83,54 @@ public class Market
 
         while(!finished)
         {
+            // Peek because we don't want to remove the top element until the order is closed
             highestBid = bidMaxPriceList.peek();
             lowestOffer = offerMinPriceList.peek();
 
+            // No possible trade if either list is empty or no bid higher than an offer
             if(lowestOffer == null || highestBid == null || lowestOffer > highestBid)
             {
-                // No possible trade if either list is empty or no bid higher than an offer
                 finished = true;
             }
             else
             {
-                // gets buckets for both maps
+                // Gets buckets for both maps
                 bidBucket = bidMap.get(bidMaxPriceList.peek());
                 offerBucket = offerMap.get(offerMinPriceList.peek());
 
-                // Gets first element from each bucket since that's the oldest
+                // Gets first element from each bucket since they're the oldest
                 int bidQuantity = bidBucket.get(0).getQuantity();
                 int offerQuantity = offerBucket.get(0).getQuantity();
 
                 if(bidQuantity > offerQuantity)
                 {
-                    System.out.println(offerQuantity + " shares traded for " + lowestOffer + " dollars per share.");
+                    System.out.println(successfulTrade(offerQuantity, lowestOffer));
 
-                    // Decrement quantity in bid and close previous offer
+                    // Decrements quantity in bid
                     bidQuantity -= offerQuantity;
                     bidBucket.get(0).setQuantity(bidQuantity);
+                    // Closes previous offer
                     offerBucket.remove(0);
                     offerMinPriceList.remove();
                 }
                 else if(offerQuantity > bidQuantity)
                 {
-                    System.out.println(bidQuantity + " shares traded for " + lowestOffer + " dollars per share.");
+                    System.out.println(successfulTrade(bidQuantity, lowestOffer));
 
-                    // Decrement quantity in offer and close previous bid
+                    // Decrements quantity in offer
                     offerQuantity -= bidQuantity;
+                    offerBucket.get(0).setQuantity(offerQuantity);
+                    //  Closes previous bid
                     bidBucket.remove(0);
                     bidMaxPriceList.remove();
-                    offerBucket.get(0).setQuantity(offerQuantity);
                 }
                 else
                 {
-                    System.out.println(bidQuantity + " shares traded for " + lowestOffer + " dollars per share.");
+                    // bidQuantity is an arbitrary choice because both quantities are equal.
+                    // lowestOffer is chosen because it's the price at which the trade is made.
+                    System.out.println(successfulTrade(bidQuantity, lowestOffer));
 
-                    // Remove bid and offer because they're both closed
+                    // Removes bid and offer because they're both closed
                     bidBucket.remove(0);
                     bidMaxPriceList.remove();
                     offerBucket.remove(0);
@@ -134,42 +140,51 @@ public class Market
         }
     }
 
+    // Returns the string printed for a successful trade.
+    public String successfulTrade(int quantity, double price)
+    {
+        return quantity + " shares traded for $" + price + " per share.";
+    }
+
+    // Prints the remaining trades from input map after close of market.
+    private void printFailedTrades(Map<Double, List<Order>> hashmap, String type)
+    {
+        for (Double key : hashmap.keySet())
+        {
+            List<Order> bucket = hashmap.get(key);
+
+            for(Order order : bucket)
+            {
+                System.out.println(type + order.getQuantity() + " shares for $" + order.getPrice() + " per share failed to trade.");
+            }
+        }
+    }
+
+    // Signifies that the market is open.
     public void openMarket()
     {
-        System.out.println("The market is open for trading");
+        ringBell();
     }
 
-    public void printBids()
+    public void closeMarket()
     {
-        System.out.println("Values of map after iterating over it : ");
-
-        for (Double key : bidMap.keySet())
-        {
-
-            List<Order> bucket = bidMap.get(key);
-
-            for(Order o : bucket)
-            {
-                System.out.println(o.toString());
-            }
-            //bids.remove(key);
-        }
+        ringBell();
+        printFailedTrades(bidMap, "Bid for ");
+        printFailedTrades(offerMap, "Offer of ");
     }
 
-    public void printOffers()
+    public void ringBell()
     {
-        System.out.println("Values of map after iterating over it : ");
+        System.out.println("DING DING DING DING DING DING DING DING DING DING DING DING DING.");
+    }
 
-        for (Double key : offerMap.keySet())
-        {
+    public Map<Double, List<Order>> getBidMap()
+    {
+        return bidMap;
+    }
 
-            List<Order> bucket = offerMap.get(key);
-
-            for(Order o : bucket)
-            {
-                System.out.println(o.toString());
-            }
-            //bids.remove(key);
-        }
+    public Map<Double, List<Order>> getOfferMap()
+    {
+        return offerMap;
     }
 }

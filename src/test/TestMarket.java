@@ -9,116 +9,160 @@ import java.util.List;
 import java.util.LinkedList;
 
 import com.rrj09832.rjob.Market;
+import com.rrj09832.rjob.Order;
 
 public class TestMarket
 {
-//    private Market market;
-//
-//    @Before
-//    public void setUp() throws Exception
-//    {
-//        ibs = new InterruptedBubbleSort();
-//    }
-//
-//    /*******************************************
-//     *
-//     *   sort test
-//     *
-//     *******************************************/
-//
-//    @Test
-//    public void sortingListShouldSortList()
-//    {
-//        String expectedString1 = "4 3 2 1 5";
-//        String expectedString2 = "3 2 1 4 5";
-//        String expectedString3 = "2 1 3 4 5";
-//        String expectedString4 = "1 2 3 4 5";  // Used for last two cases
-//
-//        // One repetition
-//        List<Integer> numberList = initializeList();
-//        ibs.sort(numberList, 1L);
-//        assertEquals(expectedString1, ibs.getFormattedString(numberList));
-//
-//        // Two repetitions
-//        numberList = initializeList();
-//        ibs.sort(numberList, 2L);
-//        assertEquals(expectedString2, ibs.getFormattedString(numberList));
-//
-//        // Three repetitions
-//        numberList = initializeList();
-//        ibs.sort(numberList, 3L);
-//        assertEquals(expectedString3, ibs.getFormattedString(numberList));
-//
-//        // Four repetitions
-//        numberList = initializeList();
-//        ibs.sort(numberList, 4L);
-//        assertEquals(expectedString4, ibs.getFormattedString(numberList));
-//
-//        // Five repetitions
-//        numberList = initializeList();
-//        ibs.sort(numberList, 5L);
-//        assertEquals(expectedString4, ibs.getFormattedString(numberList));
-//    }
-//
-//    public List<Integer> initializeList()
-//    {
-//        List<Integer> numberList = new LinkedList<Integer>();
-//        numberList.add(5);
-//        numberList.add(4);
-//        numberList.add(3);
-//        numberList.add(2);
-//        numberList.add(1);
-//        return numberList;
-//    }
-//
-//    /*******************************************
-//     *
-//     *   swap test
-//     *
-//     *******************************************/
-//
-//    @Test
-//    public void swappingTwoElementsShouldCorrectlySwap()
-//    {
-//        List<Integer> numberList = new LinkedList<Integer>();
-//        numberList.add(2);
-//        numberList.add(1);
-//        ibs.swap(numberList, 0, 1);
-//        assertEquals((int)1, (int)numberList.get(0));
-//        assertEquals((int)2, (int)numberList.get(1));
-//    }
-//
-//    /*******************************************
-//     *
-//     *   getFormattedString test
-//     *
-//     *******************************************/
-//
-//    @Test
-//    public void getFormattedStringShouldReturnCorrectlyFormattedString()
-//    {
-//        String expectedString = "1 2 3";
-//        List<Integer> numberList = new LinkedList<Integer>();
-//        numberList.add(1);
-//        numberList.add(2);
-//        numberList.add(3);
-//        assertEquals(expectedString, ibs.getFormattedString(numberList));
-//    }
-//
-//    /*******************************************
-//     *
-//     *   getNumberList test
-//     *
-//     *******************************************/
-//
-//    @Test
-//    public void getNumberListShouldReturnCorrectlyOrderedListOfNumbers()
-//    {
-//        String numberString = "1 2 3";
-//        List<Integer> expectedList = new LinkedList<Integer>();
-//        expectedList.add(1);
-//        expectedList.add(2);
-//        expectedList.add(3);
-//        assertEquals(expectedList, ibs.getNumberList(numberString));
-//    }
+    private Market market;
+
+    @Before
+    public void initMarket()
+    {
+        market = new Market();
+    }
+
+    /*******************************************
+     *
+     *   addBid Tests
+     *
+     *******************************************/
+
+    @Test
+    public void addNewBidShouldCorrectlyAddNewBid()
+    {
+        initMarket();
+        assertTrue(market.getBidMap().isEmpty());
+        market.addBid(12.0, 1);
+        assertTrue(market.getBidMap().containsKey(12.0));
+    }
+
+    @Test
+    public void addDuplicateBidPriceShouldCorrectlyAddNewBid()
+    {
+        initMarket();
+        assertTrue(market.getBidMap().isEmpty());
+        market.addBid(12.0, 1);
+        market.addBid(12.0, 2);
+
+        // Checks to see if corresponding elements have same quantities.
+        assertEquals(1, market.getBidMap().get(12.0).get(0).getQuantity());
+        assertEquals(2, market.getBidMap().get(12.0).get(1).getQuantity());
+    }
+
+    /*******************************************
+     *
+     *   addOffer Tests
+     *
+     *******************************************/
+
+    @Test
+    public void addNewOfferShouldCorrectlyAddNewOffer()
+    {
+        initMarket();
+        assertTrue(market.getOfferMap().isEmpty());
+        market.addOffer(12.0, 1);
+        assertTrue(market.getOfferMap().containsKey(12.0));
+    }
+
+    @Test
+    public void addDuplicateOfferPriceShouldCorrectlyAddNewOffer()
+    {
+        initMarket();
+        assertTrue(market.getOfferMap().isEmpty());
+        market.addOffer(12.0, 1);
+        market.addOffer(12.0, 2);
+
+        // Checks to see if corresponding elements have same quantities.
+        assertEquals(1, market.getOfferMap().get(12.0).get(0).getQuantity());
+        assertEquals(2, market.getOfferMap().get(12.0).get(1).getQuantity());
+    }
+
+    /*******************************************
+     *
+     *   getBucket Test
+     *
+     *******************************************/
+
+    @Test
+    public void getBucketShouldReturnCorrectList()
+    {
+        initMarket();
+        assertTrue(market.getOfferMap().isEmpty());
+        market.addOffer(12.0, 1);
+        market.addOffer(12.0, 2);
+
+        // Checks to see if corresponding bucket elements have same quantities.
+        assertEquals(1, market.getBucket(market.getOfferMap(), 12.0).get(0).getQuantity());
+        assertEquals(2, market.getBucket(market.getOfferMap(), 12.0).get(1).getQuantity());
+    }
+
+    /*******************************************
+     *
+     *   matchOrders Tests
+     *
+     *******************************************/
+
+    @Test
+    public void BidQuantityShouldCorrectlyDecrementWhenGreaterThanOfferQuantity()
+    {
+        initMarket();
+        market.addOffer(12.0, 6);
+        market.addBid(12.0, 9);
+        market.matchOrders();
+        assertEquals(3, market.getBidMap().get(12.0).get(0).getQuantity());  // Bid correctly decremented
+        assertTrue(market.getOfferMap().get(12.0).isEmpty());  // Offer correctly closed
+    }
+
+    @Test
+    public void OfferQuantityShouldCorrectlyDecrementWhenGreaterThanBidQuantity()
+    {
+        initMarket();
+        market.addBid(12.0, 5);
+        market.addOffer(12.0, 10);
+        market.matchOrders();
+        assertEquals(5, market.getOfferMap().get(12.0).get(0).getQuantity());  // Offer correctly decremented
+        assertTrue(market.getBidMap().get(12.0).isEmpty());  // Bid correctly closed
+    }
+
+    @Test
+    public void BothQuantitiesEqualShouldCorrectlyRemoveBoth()
+    {
+        initMarket();
+        market.addBid(12.0, 5);
+        market.addOffer(12.0, 5);
+        market.matchOrders();
+        assertTrue(market.getBidMap().get(12.0).isEmpty());   // Bid correctly closed
+        assertTrue(market.getOfferMap().get(12.0).isEmpty()); // Offer correctly closed
+    }
+
+    @Test
+    public void BidWithValueAndNoOffersShouldStayTheSame()
+    {
+        initMarket();
+        market.addBid(12.0, 5);
+        market.matchOrders();
+        assertEquals(5, market.getBidMap().get(12.0).get(0).getQuantity());   // Bid still has same value
+        assertTrue(market.getOfferMap().get(12.0) == null); // Offer still null
+    }
+
+    @Test
+    public void OfferWithValueAndNoBidsShouldStayTheSame()
+    {
+        initMarket();
+        market.addOffer(12.0, 5);
+        market.matchOrders();
+        assertEquals(5, market.getOfferMap().get(12.0).get(0).getQuantity());   // Offer still has same value
+        assertTrue(market.getBidMap().get(12.0) == null); // Bid still null
+    }
+
+    @Test
+    public void OfferPriceHigherThanBidPriceShouldStayTheSame()
+    {
+        initMarket();
+        market.addOffer(12.0, 7);
+        market.addBid(6.0, 5);
+        market.matchOrders();
+        assertEquals(7, market.getOfferMap().get(12.0).get(0).getQuantity());   // Offer still has same value
+        assertEquals(5, market.getBidMap().get(6.0).get(0).getQuantity());   // Bid still has same value
+    }
 }
