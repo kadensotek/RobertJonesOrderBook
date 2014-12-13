@@ -163,19 +163,14 @@ public class Market
     // Signifies that the market is open.
     public void openMarket()
     {
-        ringBell();
+        System.out.println("Market opens.");
     }
 
     public void closeMarket()
     {
-        ringBell();
+        System.out.println("Market closes.");
         printFailedTrades(bidMap, "Bid for ");
         printFailedTrades(offerMap, "Offer of ");
-    }
-
-    public void ringBell()
-    {
-        System.out.println("DING DING DING DING DING DING DING DING DING DING DING DING DING.");
     }
 
     public Map<Double, List<Order>> getBidMap()
