@@ -34,7 +34,8 @@ public class RobertJonesOrderBook
         sb.append("Offer: 200 shares at $20.31 per share.\n");
         sb.append("Bid: 100 shares at $20.15 per share.\n");
         sb.append("Bid: 200 shares at $20.22 per share.\n");
-        sb.append("Bid: 200 shares at $20.35 per share.\n");
+        sb.append("Bid: 200 shares at $20.22 per share.\n");
+        sb.append("Bid: 200 shares at $20.15 per share.\n");
         sb.append("Offer: 150 shares at $20.09 per share.\n");
         System.out.println(sb.toString());
     }
